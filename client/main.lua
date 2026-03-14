@@ -121,15 +121,19 @@ CreateThread(function()
                 end
                 
                 if shouldRemove then
-                    print('[Parcel Monitor] Removing invalid prop at location ' .. propId)
                     RemoveProp(propId)
+                    if Config.Debug then
+                        print('[Parcel Monitor] Removing invalid prop at location ' .. propId)
+                    end
                 end
             end
         end
         
         for interactionName, entity in pairs(activeTargets) do
             if not DoesEntityExist(entity) then
-                print('[Parcel Monitor] Cleaning up orphaned target: ' .. interactionName)
+                if Config.Debug then
+                    print('[Parcel Monitor] Cleaning up orphaned target: ' .. interactionName)
+                end
                 activeTargets[interactionName] = nil
             end
         end
@@ -153,7 +157,7 @@ local CreateInteractionZone = function(location, k, spawnedProp, interactionName
         return
     end
     
-    if not DoesEntityExist(spawnedProp) then
+    if not DoesEntityExist(spawnedProp) and Config.Debug then
         print('[Parcel Target] Cannot create target - prop does not exist for location ' .. k)
         return
     end
@@ -161,7 +165,7 @@ local CreateInteractionZone = function(location, k, spawnedProp, interactionName
     CreateThread(function()
         Wait(100)
         
-        if not DoesEntityExist(spawnedProp) then
+        if not DoesEntityExist(spawnedProp) and Config.Debug then
             print('[Parcel Target] Prop disappeared before target creation for location ' .. k)
             return
         end
@@ -196,18 +200,20 @@ local CreateInteractionZone = function(location, k, spawnedProp, interactionName
         })
         
         activeTargets[interactionName] = spawnedProp
-        print('[Parcel Target] Successfully created target for location ' .. k)
+        if Config.Debug then
+            print('[Parcel Target] Successfully created target for location ' .. k)
+        end
     end)
 end
 
 -- Spawn prop if conditions are met
 local SpawnPropIfAvailable = function(location, k, bypassTakenCheck)
-    if not bypassTakenCheck and GlobalState['parcel_taken_' .. k] then 
+    if not bypassTakenCheck and GlobalState['parcel_taken_' .. k] and Config.Debug then 
         print('[Parcel Spawn] Skipping spawn for location ' .. k .. ' - already taken')
         return 
     end
     
-    if location.spawnedProp and DoesEntityExist(location.spawnedProp) then 
+    if location.spawnedProp and DoesEntityExist(location.spawnedProp) and Config.Debug then 
         print('[Parcel Spawn] Skipping spawn for location ' .. k .. ' - prop already exists')
         return 
     end
@@ -220,7 +226,7 @@ local SpawnPropIfAvailable = function(location, k, bypassTakenCheck)
     local interactionName = 'box_interaction_' .. k
     local spawnedProp = CreateProp(location)
     
-    if not DoesEntityExist(spawnedProp) then
+    if not DoesEntityExist(spawnedProp) and Config.Debug then
         print('[Parcel Spawn] Failed to create prop for location ' .. k)
         return
     end
@@ -228,8 +234,9 @@ local SpawnPropIfAvailable = function(location, k, bypassTakenCheck)
     location.spawnedProp = spawnedProp
     table.insert(spawnedProps, { prop = spawnedProp, id = k })
     CreateInteractionZone(location, k, spawnedProp, interactionName)
-    
-    print('[Parcel Spawn] Successfully spawned prop for location ' .. k)
+    if Config.Debug then
+        print('[Parcel Spawn] Successfully spawned prop for location ' .. k)
+    end
 end
 
 -- Handle enter/exit for each configured location

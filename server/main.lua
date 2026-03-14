@@ -26,13 +26,13 @@ local TakePackage = function(src, propId)
     local allowedRange  = 5.0
     local distance      = #(playerCoords - propLocation)
 
-    if GlobalState['parcel_taken_' .. propId] then
+    if GlobalState['parcel_taken_' .. propId] and Config.Debug then
         print(locale('prints.package_already_taken', { source = src }))
         -- DropPlayer(src, locale('prints.package_already_taken_drop_reason'))
         return
     end
 
-    if distance > allowedRange then
+    if distance > allowedRange and Config.Debug then
         print(locale('prints.out_of_range', { source = src, location = propId }))
         -- DropPlayer(src, locale('prints.out_of_range_drop_reason'))
         return
